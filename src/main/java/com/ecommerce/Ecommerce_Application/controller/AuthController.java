@@ -1,0 +1,7 @@
+package com.ecommerce.Ecommerce_Application.controller;
+
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class AuthController {
+}

@@ -1,8 +1,8 @@
 package com.ecommerce.Ecommerce_Application.controller;
 
-import com.ecommerce.Ecommerce_Application.payload.ProductRequest;
-import com.ecommerce.Ecommerce_Application.payload.ProductResponse;
-import com.ecommerce.Ecommerce_Application.payload.ProductResponsePage;
+import com.ecommerce.Ecommerce_Application.payload.request.ProductRequest;
+import com.ecommerce.Ecommerce_Application.payload.response.ProductResponse;
+import com.ecommerce.Ecommerce_Application.payload.response.ProductResponsePage;
 import com.ecommerce.Ecommerce_Application.service.ProductService;
 import com.ecommerce.Ecommerce_Application.util.AppConstants;
 import jakarta.validation.Valid;

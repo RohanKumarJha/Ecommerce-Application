@@ -1,4 +1,4 @@
-package com.ecommerce.Ecommerce_Application.payload;
+package com.ecommerce.Ecommerce_Application.payload.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,8 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductResponse {
-    private Long productId;
+public class ProductRequest {
     private String productName;
     private String image;
     private String description;

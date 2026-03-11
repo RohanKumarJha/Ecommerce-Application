@@ -1,8 +1,8 @@
 package com.ecommerce.Ecommerce_Application.service;
 
-import com.ecommerce.Ecommerce_Application.payload.ProductRequest;
-import com.ecommerce.Ecommerce_Application.payload.ProductResponse;
-import com.ecommerce.Ecommerce_Application.payload.ProductResponsePage;
+import com.ecommerce.Ecommerce_Application.payload.request.ProductRequest;
+import com.ecommerce.Ecommerce_Application.payload.response.ProductResponse;
+import com.ecommerce.Ecommerce_Application.payload.response.ProductResponsePage;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;

@@ -1,8 +1,8 @@
 package com.ecommerce.Ecommerce_Application.controller;
 
-import com.ecommerce.Ecommerce_Application.payload.CategoryRequest;
-import com.ecommerce.Ecommerce_Application.payload.CategoryResponse;
-import com.ecommerce.Ecommerce_Application.payload.CategoryResponsePage;
+import com.ecommerce.Ecommerce_Application.payload.request.CategoryRequest;
+import com.ecommerce.Ecommerce_Application.payload.response.CategoryResponse;
+import com.ecommerce.Ecommerce_Application.payload.response.CategoryResponsePage;
 import com.ecommerce.Ecommerce_Application.service.CategoryService;
 import com.ecommerce.Ecommerce_Application.util.AppConstants;
 import jakarta.validation.Valid;
