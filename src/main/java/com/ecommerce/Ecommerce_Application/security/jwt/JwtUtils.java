@@ -1,12 +1,15 @@
 package com.ecommerce.Ecommerce_Application.security.jwt;
 
+import com.ecommerce.Ecommerce_Application.security.services.UserDetailsImpl;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.util.Date;
 
 @Component
 public class JwtUtils {
@@ -39,5 +42,15 @@ public class JwtUtils {
                 .parseSignedClaims(jwtToken)
                 .getPayload()
                 .getSubject();
+    }
+
+
+    public String generateJwtToken(UserDetailsImpl userDetails) {
+        return Jwts.builder()
+                .subject(userDetails.getUsername())
+                .issuedAt(new Date())
+                .expiration(new Date((new Date().getTime()) + 1000))
+                .signWith(key())
+                .compact();
     }
 }
