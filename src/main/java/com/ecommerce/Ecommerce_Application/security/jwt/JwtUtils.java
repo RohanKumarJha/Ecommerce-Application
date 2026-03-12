@@ -17,6 +17,9 @@ public class JwtUtils {
     @Value("${spring.app.jwtSecret}")
     private String secretKey;
 
+    @Value("${spring.app.jwtExpirationMs}")
+    private int ExpirationMs;
+
     private SecretKey key() {
         return Keys.hmacShaKeyFor(
                 Decoders.BASE64.decode(secretKey)
@@ -49,7 +52,7 @@ public class JwtUtils {
         return Jwts.builder()
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date())
-                .expiration(new Date((new Date().getTime()) + 1000))
+                .expiration(new Date((new Date().getTime()) + ExpirationMs))
                 .signWith(key())
                 .compact();
     }

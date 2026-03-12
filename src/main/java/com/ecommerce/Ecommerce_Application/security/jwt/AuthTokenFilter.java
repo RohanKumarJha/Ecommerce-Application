@@ -1,6 +1,7 @@
 package com.ecommerce.Ecommerce_Application.security.jwt;
 
 import com.ecommerce.Ecommerce_Application.security.services.UserDetailsServiceImpl;
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,9 +25,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     private UserDetailsServiceImpl userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(@Nonnull HttpServletRequest request,
+                                    @Nonnull HttpServletResponse response,
+                                    @Nonnull FilterChain filterChain) throws ServletException, IOException {
         try {
             String jwtToken = getTokenFromHeader(request);
             if (jwtToken != null && jwtUtils.checkTokenValidation(jwtToken)) {
@@ -39,8 +40,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                                 userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
         }
         filterChain.doFilter(request, response);
     }
