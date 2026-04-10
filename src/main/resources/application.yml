@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: Ecommerce_application
+
+  datasource:
+    url: jdbc:h2:mem:ecommerce
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+  h2:
+    console:
+      enabled: true
+
+  app:
+    jwtSecret: mySecretKey123912738aopsgjnspkmndfsopkvajoirjg94gf2opfng2moknm
+    jwtExpirationMs: 3000000
+
+server:
+  port: 8080
