@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 @Service
 public class AuthServiceImpl implements AuthService {
 
-    private final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -56,20 +56,17 @@ public class AuthServiceImpl implements AuthService {
     // ---------------------- REGISTER USER ----------------------
     @Override
     public String registerUser(SignupRequest signUpRequest) {
-        log.info("Attempting to register user: {}", signUpRequest.getUserName());
-
-        // ✅ Validation
+        log.info("Register request received for username: {}", signUpRequest.getUserName());
         if (userRepository.existsByUserName(signUpRequest.getUserName())) {
+            log.warn("Registration failed: Username already exists: {}", signUpRequest.getUserName());
             throw new APIException("Username is already in use");
         }
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+            log.warn("Registration failed: Email already exists: {}", signUpRequest.getEmail());
             throw new APIException("Email is already in use");
         }
-
-        // ✅ Role Mapping
         Set<Role> roles = mapRoles(signUpRequest.getRole());
-
-        // ✅ Factory Usage 🔥
+        log.debug("Roles mapped for user {}: {}", signUpRequest.getUserName(), roles);
         User user = UserFactory.createUser(
                 signUpRequest.getUserName(),
                 signUpRequest.getEmail(),
@@ -78,26 +75,49 @@ public class AuthServiceImpl implements AuthService {
                 encoder
         );
         userRepository.save(user);
-        log.info("User registered successfully: {}", signUpRequest.getUserName());
+        log.info("User successfully registered with username: {}", signUpRequest.getUserName());
         return "User registered successfully";
     }
 
-    // ---------------------- ROLE MAPPING (CLEAN SEPARATION) ----------------------
+    // ---------------------- ROLE MAPPING ----------------------
     private Set<Role> mapRoles(Set<String> strRoles) {
+        log.debug("Mapping roles: {}", strRoles);
         Set<Role> roles = new HashSet<>();
-        if (strRoles == null) {
+        if (strRoles == null || strRoles.isEmpty()) {
+            log.info("No roles provided, assigning default ROLE_USER");
             Role userRole = roleRepository.findByRoleName(AppRole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                    .orElseThrow(() -> {
+                        log.error("ROLE_USER not found in database");
+                        return new RuntimeException("Error: Role is not found.");
+                    });
             roles.add(userRole);
         } else {
             strRoles.forEach(role -> {
                 switch (role) {
-                    case "ROLE_ADMIN" -> roles.add(roleRepository.findByRoleName(AppRole.ROLE_ADMIN)
-                            .orElseThrow(() -> new RuntimeException("Error: Role not found")));
-                    case "ROLE_SELLER" -> roles.add(roleRepository.findByRoleName(AppRole.ROLE_SELLER)
-                            .orElseThrow(() -> new RuntimeException("Error: Role not found")));
-                    default -> roles.add(roleRepository.findByRoleName(AppRole.ROLE_USER)
-                            .orElseThrow(() -> new RuntimeException("Error: Role not found")));
+                    case "ROLE_ADMIN" -> {
+                        log.debug("Assigning ROLE_ADMIN");
+                        roles.add(roleRepository.findByRoleName(AppRole.ROLE_ADMIN)
+                                .orElseThrow(() -> {
+                                    log.error("ROLE_ADMIN not found in database");
+                                    return new RuntimeException("Error: Role not found");
+                                }));
+                    }
+                    case "ROLE_SELLER" -> {
+                        log.debug("Assigning ROLE_SELLER");
+                        roles.add(roleRepository.findByRoleName(AppRole.ROLE_SELLER)
+                                .orElseThrow(() -> {
+                                    log.error("ROLE_SELLER not found in database");
+                                    return new RuntimeException("Error: Role not found");
+                                }));
+                    }
+                    default -> {
+                        log.debug("Assigning default ROLE_USER");
+                        roles.add(roleRepository.findByRoleName(AppRole.ROLE_USER)
+                                .orElseThrow(() -> {
+                                    log.error("ROLE_USER not found in database");
+                                    return new RuntimeException("Error: Role not found");
+                                }));
+                    }
                 }
             });
         }
@@ -107,7 +127,7 @@ public class AuthServiceImpl implements AuthService {
     // ---------------------- LOGIN ----------------------
     @Override
     public LoginResponse authenticateUser(LoginRequest loginRequest) {
-        log.info("Login attempt for user: {}", loginRequest.getUserName());
+        log.info("Login attempt for username: {}", loginRequest.getUserName());
         Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(
@@ -117,6 +137,7 @@ public class AuthServiceImpl implements AuthService {
                     )
             );
         } catch (AuthenticationException e) {
+            log.error("Authentication failed for username: {}", loginRequest.getUserName());
             throw new APIException("Invalid username or password");
         }
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -125,6 +146,7 @@ public class AuthServiceImpl implements AuthService {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
+        log.info("User logged in successfully: {}", userDetails.getUsername());
         return new LoginResponse(
                 userDetails.getUserId(),
                 jwtToken,
@@ -136,7 +158,9 @@ public class AuthServiceImpl implements AuthService {
     // ---------------------- CURRENT USERNAME ----------------------
     @Override
     public MessageResponse currentUserName(Authentication authentication) {
+        log.debug("Fetching current username");
         if (authentication == null) {
+            log.error("Authentication object is null while fetching username");
             throw new APIException("Authentication object is null");
         }
         return new MessageResponse("UserName is " + authentication.getName());
@@ -145,13 +169,16 @@ public class AuthServiceImpl implements AuthService {
     // ---------------------- USER DETAILS ----------------------
     @Override
     public UserInfoResponse getUserDetails(Authentication authentication) {
+        log.debug("Fetching user details");
         if (authentication == null) {
+            log.error("Authentication object is null while fetching user details");
             throw new APIException("Authentication object is null");
         }
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
+        log.info("User details fetched for username: {}", userDetails.getUsername());
         return new UserInfoResponse(
                 userDetails.getUserId(),
                 userDetails.getUsername(),
